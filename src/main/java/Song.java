@@ -33,6 +33,10 @@ public class Song {
         return singer;
     }
 
+    public int getTiming() {
+        return timing;
+    }
+
     /**
      * This methods check if the song's title is valid
      *
@@ -88,7 +92,7 @@ public class Song {
      *
      * @return String - this method returns formatted string
      */
-    public String getAuthor() {
+    public String Author() {
         StringBuilder songInfo = new StringBuilder();
         songInfo.append("Song's title: ")
                 .append(title)
