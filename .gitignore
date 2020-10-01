@@ -1,0 +1,5 @@
+.idea/
+out/
+**/AudioPlayerXL2.iml
+src/test/
+src/resources/
