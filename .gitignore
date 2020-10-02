@@ -3,5 +3,6 @@ out/
 target/classes/
 target/generated-sources/annotations/
 **/AudioPlayerXL2.iml
+*.class
 src/test/
 src/resources/
