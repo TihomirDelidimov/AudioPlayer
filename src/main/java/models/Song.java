@@ -1,3 +1,7 @@
+package models;
+
+import enumeration.Genre;
+
 /**
  * This class represent song
  */
@@ -10,7 +14,6 @@ public class Song {
 
 
     /**
-     *
      * @param title
      * @param author
      * @param singer
@@ -20,7 +23,7 @@ public class Song {
     public Song(String title, Author author, Singer singer, Genre genre, int timing) {
         this.title = title;
         this.author = author;
-        this.genre = genre;
+        this.genre = genre != null ? genre : Genre.UNKNOWN;
         this.timing = timing;
         this.singer = singer;
     }
@@ -47,15 +50,6 @@ public class Song {
         return title != null && title.isEmpty();
     }
 
-    /**
-     * This method check if the song's genre is valid
-     *
-     * @param genre - this parameter is the song's genre which is enumeration
-     * @return boolean - this method return true if the genre is valid and false if it's not
-     */
-    private boolean validateGenre(Genre genre) {
-        return genre != null;
-    }
 
     /**
      * This method checks if the song's timing is valid

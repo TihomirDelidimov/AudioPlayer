@@ -1,7 +1,9 @@
+package models;
+
 public class Author {
     private String name;
 
-    Author(String name) {
+    public Author(String name) {
         if(name!=null && !name.isEmpty()) {
             this.name = name;
         }

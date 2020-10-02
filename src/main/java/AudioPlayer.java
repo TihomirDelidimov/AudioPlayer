@@ -5,14 +5,18 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 
+import models.Song;
+import models.Singer;
+
 /**
  * This class represent
  */
 public class AudioPlayer {
     private List<Song> songs = new ArrayList<>();
     //  private ListIterator songIterator;
-    private String currentCommand;
+    private String currentCommand = "play";
     private int currentSongIndex;
+    private BufferedReader inputReader = new BufferedReader(new InputStreamReader(System.in));
 
     /**
      * This constructor initiates the AudioPlayer object with list of songs. It sets the iterator to the first element.
@@ -22,8 +26,6 @@ public class AudioPlayer {
     public AudioPlayer(List<Song> songs) {
         if (validateSongs(songs)) {
             this.songs.addAll(songs);
-            currentSongIndex = 0;
-            currentCommand = null;
         }
     }
 
@@ -53,11 +55,12 @@ public class AudioPlayer {
      * @return
      * @throws IOException
      */
-    private boolean isUserInput() throws IOException {
-        BufferedReader reader =
-                new BufferedReader(new InputStreamReader(System.in));
-        currentCommand = reader.readLine().trim();
-        return validateCommand();
+    private boolean checkForInput() throws IOException {
+        if (inputReader.ready()) {
+            currentCommand = inputReader.readLine().trim();
+            return validateCommand();
+        }
+        return false;
     }
 
 
@@ -67,11 +70,8 @@ public class AudioPlayer {
     private boolean validateCommand() {
         switch (currentCommand) {
             case "play":
-                return true;
             case "next":
-                return true;
             case "prev":
-                return true;
             case "pause":
                 return true;
         }
@@ -84,12 +84,11 @@ public class AudioPlayer {
      * @throws InterruptedException
      */
     public void start() throws IOException, InterruptedException {
-        while (true) {
-
-            if(isUserInput()) {
+        while (!currentCommand.equals("exit")) {
                 switch (currentCommand) {
                     case "play":
                         playSong();
+                        break;
                     case "next":
                         nextSong();
                         playSong();
@@ -98,8 +97,10 @@ public class AudioPlayer {
                         prevSong();
                         playSong();
                         break;
+                    case "pause":
+                        pauseSong();
+                        break;
                 }
-            }
         }
     }
 
@@ -108,18 +109,29 @@ public class AudioPlayer {
      */
     public void playSong() throws InterruptedException, IOException {
         if (validateSongs(songs)) {
-            for (int songIndex = currentSongIndex; songIndex < songs.size(); songIndex++) {
+            for (int songIndex = currentSongIndex; songIndex < songs.size(); songIndex++, nextSong()) {
                 System.out.println("\nCurrently playing :" + getSongInfo());
                 for (int timeLeft = songs.get(songIndex).getTiming(); timeLeft > 0; timeLeft--) {
-                    Thread.sleep(1000);
-                    if (isUserInput()) {
+                    Thread.sleep(100);
+                    if (checkForInput()) {
                         return;
                     }
                 }
             }
+            currentSongIndex = 0;
         }
     }
 
+    /**
+     *
+     */
+    private void pauseSong() throws IOException {
+        System.out.println("\nOn pause..");
+        while(!currentCommand.equals("play")) {
+            checkForInput();
+        }
+        System.out.println("\nResumed");
+    }
     /**
      * This method switch to the next song of the audio player if possible
      */
@@ -221,15 +233,6 @@ public class AudioPlayer {
      */
     public void remove(Song song) {
         if (songs.contains(song)) {
-            if (songs.indexOf(song) == currentSongIndex) {
-                if ((currentSongIndex + 1) < songs.size()) {
-                    currentSongIndex++;
-                } else if ((currentSongIndex - 1) >= 0) {
-                    currentSongIndex--;
-                } else {
-                    currentSongIndex = -1;
-                }
-            }
             songs.remove(song);
         }
     }

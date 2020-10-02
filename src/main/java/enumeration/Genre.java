@@ -1,10 +1,13 @@
+package enumeration;
+
 public enum Genre {
     ROCK("RockNRoll"),
     ELECTRONIC("Electronic"),
     DISCO("Disco"),
     HIPHOP("HIP-HOP"),
     JAZZ("Jazz"),
-    CLASSIC("Classic");
+    CLASSIC("Classic"),
+    UNKNOWN("Unknown");
 
     private String genreName;
 
