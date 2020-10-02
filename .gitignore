@@ -1,6 +1,7 @@
 .idea/
 out/
-target/
+target/classes/
+target/generated-sources/annotations/
 **/AudioPlayerXL2.iml
 src/test/
 src/resources/
