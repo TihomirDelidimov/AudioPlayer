@@ -19,7 +19,7 @@ public class Applicaiton {
         AudioPlayer audioPlayer = new AudioPlayer(songList);
         System.out.println("Type <play> to start the music: ");
         Scanner userInput = new Scanner(System.in);  // Create a Scanner object
-        String command = userInput.nextLine();
+        String command = userInput.nextLine().toLowerCase().trim();
         if(command.equals("play")) {
             audioPlayer.start();
         }

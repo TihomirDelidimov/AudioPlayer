@@ -1,5 +1,6 @@
 package models;
 
+import static enumeration.Genre.*;
 import enumeration.Genre;
 
 /**
@@ -23,7 +24,7 @@ public class Song {
     public Song(String title, Author author, Singer singer, Genre genre, int timing) {
         this.title = title;
         this.author = author;
-        this.genre = genre != null ? genre : Genre.UNKNOWN;
+        this.genre = genre != null ? genre : UNKNOWN;
         this.timing = timing;
         this.singer = singer;
     }
