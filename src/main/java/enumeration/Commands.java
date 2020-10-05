@@ -1,13 +1,18 @@
 package enumeration;
 
+/**
+ * This enumeration represent a set of commands, which are used by the application.
+ */
 public enum Commands {
     PLAY("play"),
     REPLAY("replay"),
     NEXT("next"),
     PREVIOUS("previous"),
     PAUSE("pause"),
+    SHUFFLE("shuffle"),
     EXIT("exit"),
-    SIZE("SIZE"),
+    SIZE("size"),
+    ADD("add"),
     SEARCH_BY_TITLE("sbt"),
     SEARCH_BY_SINGER("sbs");
 
@@ -36,7 +41,8 @@ public enum Commands {
 
     /**
      * This method return the string format command in Commands constant format
-     * @param stringCommand - this parameter is the command in string format, which we evaluate to Commands constant
+     *
+     * @param stringCommand - this parameter is the command in string format, which is evaluated to Commands constant
      * @return - this method return Commands constant
      */
     public static Commands getCommandFromString(String stringCommand) {
