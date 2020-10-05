@@ -80,7 +80,6 @@ public class AudioPlayer {
      * @throws InterruptedException
      */
     public boolean executeSong() throws IOException, InterruptedException {
-        int timeLeft;
         if (!wasSongPaused) {
             songDurationLeft = songs.get(currentSongIndex).getTiming();
         } else {

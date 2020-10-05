@@ -45,7 +45,7 @@ public class Applicaiton {
     /**
      * This method is used to check if the application state is changed. The state is changed when a new valid command is given
      *
-     * @return
+     * @return this method return true if there is valid input on the console, otherwise return false
      */
     public boolean isStateChanged() throws IOException {
         return checkForInput();

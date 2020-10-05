@@ -14,8 +14,8 @@ public class Singer {
     /**
      * This methods check if the singer's name is valid. If it is the name is returned, otherwise DEFAULT_SINGER_NAME is returned
      *
-     * @param name
-     * @return
+     * @param name - this parameter is the the name to be checked
+     * @return - this method return the parameter if it's valid, otherwise return default value
      */
     private String getValidName(String name) {
         if (name != null && !name.isEmpty()) {
