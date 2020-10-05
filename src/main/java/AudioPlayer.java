@@ -11,7 +11,7 @@ import models.Singer;
  */
 public class AudioPlayer {
     private List<Song> songs = new ArrayList<>();
-    Applicaiton applicaiton;
+    private Applicaiton applicaiton;
     private int currentSongIndex;
     private boolean wasSongPaused;
     private int songDurationLeft;
