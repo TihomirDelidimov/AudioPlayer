@@ -1,5 +1,8 @@
 package models;
 
+/**
+ * This class represent a singer, which is associated with songs
+ */
 public class Singer {
     private String name;
     private static final String DEFAULT_SINGER_NAME = "Unknown";
@@ -25,6 +28,11 @@ public class Singer {
         return name;
     }
 
+    /**
+     * This method implement equals between two singer objects. It compares them by name of the singer
+     * @param singerToCompare - this is the singer object
+     * @return - this method return true if the two objects have same name, otherwise return false
+     */
     @Override
     public boolean equals(Object singerToCompare) {
         if (!(singerToCompare instanceof Singer)) {
