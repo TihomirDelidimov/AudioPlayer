@@ -107,6 +107,7 @@ public class AudioPlayer {
      * This method pauses the song until the "play" command is given in the console
      */
     public void pauseSong() throws IOException {
+        wasSongPaused = true;
         while (!applicaiton.isStateChanged()) ;
     }
 
