@@ -6,6 +6,7 @@ import java.io.IOException;
 import static enumeration.Command.*;
 
 import enumeration.Command;
+import exceptions.MissingAudioPlayerIOReferenceException;
 import models.Song;
 import models.Singer;
 
@@ -13,31 +14,27 @@ import models.Singer;
  * This class represent an audio player and it's functions
  */
 public class AudioPlayer {
+    private AudioPlayerConsoleIO audioPlayerIO;
+    private AudioPlayerState audioPlayerState;
     private List<Song> songs = new ArrayList<>();
-    private Command commandFromInput = INVALID_COMMAND;
+    private final Command commandFromInput = INVALID_COMMAND;
     private int currentSongIndex;
     private boolean isSongPaused;
     private int songDurationLeft;
     private static int FIRST_SONG_INDEX = 0;
 
     /**
-     * This methods add a list of songs to the list of songs in the audio player.
+     * This constructor initializes the AudioPlayer object with reference to the AudioPlayerConsoleIO, which is
+     * needed to track the changes on the input while playing a song
      *
-     * @param songs - this parameter is the list with songs to add
+     * @param audioPlayerIO - this parameter is references to the AudioPlayerConsoleIO
      */
-    public void addListOfSongs(List<Song> songs) {
-        if (validateSongs(songs)) {
-            this.songs.addAll(songs);
+    public AudioPlayer(AudioPlayerConsoleIO audioPlayerIO, AudioPlayerState audioPlayerState) {
+        if (audioPlayerIO == null) {
+            throw new MissingAudioPlayerIOReferenceException("Missing AudioPlayerConsoleIO reference!");
         }
-    }
-
-    /**
-     * This method check if there are any songs in the list
-     *
-     * @return boolean - the method return true if there is at least one song, if there isn't return false
-     */
-    private boolean validateSongs(List<Song> songs) {
-        return songs != null && songs.size() > 0;
+        this.audioPlayerState = audioPlayerState;
+        this.audioPlayerIO = audioPlayerIO;
     }
 
     /**
@@ -65,15 +62,13 @@ public class AudioPlayer {
      * @throws InterruptedException
      */
     public void play() throws IOException, InterruptedException {
-        if (validateSongs(songs)) {
-            for (; currentSongIndex < songs.size(); next()) {
-                System.out.println("Currently playing :" + getSongInfo());
-                if (execute()) {
-                    return;
-                }
+        for (; currentSongIndex < songs.size(); next()) {
+            System.out.println("Currently playing :" + getSongInfo());
+            if (execute()) {
+                return;
             }
-            replay();
         }
+        replay();
     }
 
     /**
@@ -90,9 +85,9 @@ public class AudioPlayer {
         } else {
             isSongPaused = false;
         }
-        for (; songDurationLeft > 0; songDurationLeft--) {
+        for (; songDurationLeft >= 0; songDurationLeft--) {
             Thread.sleep(100);
-            if (AudioPlayerConsoleIO.checkForInput()) {
+            if (audioPlayerIO.checkForInput()) {
                 return true;
             }
         }
@@ -105,7 +100,7 @@ public class AudioPlayer {
      */
     public void replay() {
         currentSongIndex = FIRST_SONG_INDEX;
-        AudioPlayerState.setCurrent(PLAY);
+        audioPlayerState.setCurrent(PLAY);
     }
 
     /**
@@ -114,7 +109,7 @@ public class AudioPlayer {
      */
     public void pause() throws IOException {
         isSongPaused = true;
-        while (!AudioPlayerConsoleIO.checkForInput());
+        while (!audioPlayerIO.checkForInput()) ;
     }
 
     /**
@@ -127,7 +122,7 @@ public class AudioPlayer {
         } else {
             currentSongIndex = songs.size() - 1;
         }
-        AudioPlayerState.setCurrent(PLAY);
+        audioPlayerState.setCurrent(PLAY);
     }
 
     /**
@@ -140,7 +135,7 @@ public class AudioPlayer {
         } else {
             currentSongIndex = FIRST_SONG_INDEX;
         }
-        AudioPlayerState.setCurrent(PLAY);
+        audioPlayerState.setCurrent(PLAY);
     }
 
     /**
@@ -169,7 +164,7 @@ public class AudioPlayer {
      * @throws InterruptedException
      */
     public void shuffle() throws IOException, InterruptedException {
-        if (validateSongs(songs)) {
+        if (currentSongIndex < songs.size()) {
             Random randomSongIndex = new Random();
             do {
                 currentSongIndex = randomSongIndex.nextInt(songs.size());
@@ -192,11 +187,11 @@ public class AudioPlayer {
                     songInfo.append(song.getSingerName())
                             .append("\nSong's number: ")
                             .append(songs.indexOf(song) + 1);
+                    audioPlayerState.changeCurrentToPrevious();
                     return songInfo.toString();
                 }
             }
         }
-        AudioPlayerState.changeCurrentToPrevious();
         return null;
     }
 
@@ -216,7 +211,7 @@ public class AudioPlayer {
                 songsBySinger.append(song);
             }
         }
-        AudioPlayerState.changeCurrentToPrevious();
+        audioPlayerState.changeCurrentToPrevious();
         return songsBySinger.toString();
     }
 
@@ -226,7 +221,7 @@ public class AudioPlayer {
      * @return int - the returned value is the count of the songs in the list
      */
     public int size() {
-        AudioPlayerState.changeCurrentToPrevious();
+        audioPlayerState.changeCurrentToPrevious();
         return songs.size();
     }
 
@@ -239,7 +234,7 @@ public class AudioPlayer {
         if (song != null) {
             songs.add(song);
         }
-        AudioPlayerState.changeCurrentToPrevious();
+        audioPlayerState.changeCurrentToPrevious();
     }
 
     /**
