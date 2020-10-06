@@ -1,9 +1,9 @@
 package enumeration;
 
 /**
- * This enumeration represent a set of commands, which are used by the application.
+ * This enumeration represents a set of commands, which are used by the application.
  */
-public enum Commands {
+public enum Command {
     PLAY("play"),
     REPLAY("replay"),
     NEXT("next"),
@@ -14,11 +14,12 @@ public enum Commands {
     SIZE("size"),
     ADD("add"),
     SEARCH_BY_TITLE("sbt"),
-    SEARCH_BY_SINGER("sbs");
+    SEARCH_BY_SINGER("sbs"),
+    INVALID_COMMAND("unknown");
 
     private String commandName;
 
-    Commands(String name) {
+    Command(String name) {
         commandName = name;
     }
 
@@ -28,9 +29,9 @@ public enum Commands {
      * @param stringCommand - this parameter is the command to check, which is in string format
      * @return this method return true if the command in string format is in the set of valid commands
      */
-    public static boolean isValidStringCommand(String stringCommand) {
+    public static boolean isValidCommand(String stringCommand) {
         if (stringCommand != null && !stringCommand.isEmpty()) {
-            for (Commands command : Commands.values()) {
+            for (Command command : Command.values()) {
                 if (stringCommand.equalsIgnoreCase(command.name())) {
                     return true;
                 }
@@ -45,9 +46,9 @@ public enum Commands {
      * @param stringCommand - this parameter is the command in string format, which is evaluated to Commands constant
      * @return - this method return Commands constant
      */
-    public static Commands getCommandFromString(String stringCommand) {
+    public static Command findCommand(String stringCommand) {
         if (stringCommand != null && !stringCommand.isEmpty()) {
-            return Commands.valueOf(stringCommand);
+            return Command.valueOf(stringCommand);
         }
         return null;
     }

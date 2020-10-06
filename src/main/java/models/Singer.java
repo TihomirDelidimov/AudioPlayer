@@ -1,14 +1,25 @@
 package models;
 
+import exceptions.IncorrectSingerException;
+
 /**
  * This class represent a singer, which is associated with songs
  */
 public class Singer {
     private String name;
-    private static final String DEFAULT_SINGER_NAME = "Unknown";
 
+    /**
+     * This constructor initialize the Singer class fields. If invalid name is given to the constructor IncorrectSingerNameException
+     * is thrown.
+     *
+     * @param name - this parameter is the name of the singer
+     * @throws IncorrectSingerException - this exception is thrown if the Singer class constructor is supplied with invalid parameter
+     */
     public Singer(String name) {
-        this.name = getValidName(name);
+        if (!isNameValid(name)) {
+            throw new IncorrectSingerException("Incorrect singer name!");
+        }
+        this.name = name;
     }
 
     /**
@@ -17,11 +28,8 @@ public class Singer {
      * @param name - this parameter is the the name to be checked
      * @return - this method return the parameter if it's valid, otherwise return default value
      */
-    private String getValidName(String name) {
-        if (name != null && !name.isEmpty()) {
-            return name;
-        }
-        return DEFAULT_SINGER_NAME;
+    private boolean isNameValid(String name) {
+        return name != null && !name.isEmpty();
     }
 
     public String getName() {
@@ -30,6 +38,7 @@ public class Singer {
 
     /**
      * This method implement equals between two singer objects. It compares them by name of the singer
+     *
      * @param singerToCompare - this is the singer object
      * @return - this method return true if the two objects have same name, otherwise return false
      */

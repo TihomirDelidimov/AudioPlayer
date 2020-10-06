@@ -3,6 +3,9 @@ import java.util.List;
 import java.util.Random;
 import java.io.IOException;
 
+import static enumeration.Command.*;
+
+import enumeration.Command;
 import models.Song;
 import models.Singer;
 
@@ -11,15 +14,11 @@ import models.Singer;
  */
 public class AudioPlayer {
     private List<Song> songs = new ArrayList<>();
-    private Applicaiton applicaiton;
+    private Command commandFromInput = INVALID_COMMAND;
     private int currentSongIndex;
-    private boolean wasSongPaused;
+    private boolean isSongPaused;
     private int songDurationLeft;
     private static int FIRST_SONG_INDEX = 0;
-
-    public AudioPlayer(Applicaiton app) {
-        applicaiton = app;
-    }
 
     /**
      * This methods add a list of songs to the list of songs in the audio player.
@@ -55,14 +54,21 @@ public class AudioPlayer {
     }
 
     /**
-     * This method executes songs starting from current song position, which is tracked by the class internally. If the songs list
-     * end is reached the playing start from the beginning.
+     * This method executes songs starting from current song position, which is tracked by the class internally
+     * through currentSongIndex. If the execute() method has changed the commandFromInput instance this means
+     * that the user wants to change the state of the applicaiton. In this case the method passes the command to
+     * the audio controller. If currentSongIndex points to the last song automatically the execution of the songs
+     * will start from the beginning.
+     *
+     * @return - this method return command, which represent a request to change the state of the application by the user
+     * @throws IOException
+     * @throws InterruptedException
      */
-    public void playSong() throws IOException, InterruptedException {
+    public void play() throws IOException, InterruptedException {
         if (validateSongs(songs)) {
-            for (; currentSongIndex < songs.size(); nextSong()) {
+            for (; currentSongIndex < songs.size(); next()) {
                 System.out.println("Currently playing :" + getSongInfo());
-                if (executeSong()) {
+                if (execute()) {
                     return;
                 }
             }
@@ -71,65 +77,70 @@ public class AudioPlayer {
     }
 
     /**
-     * This method execute song and checks the application if the state is changed. If the state is changed the execution of the song
-     * is interrupted. If the application's state is not changed when the time left reach 0, false value is return. If the song is paused
-     * during the playing, then the playing is restored from the same song, the execution of the song continues from the same timing.
-     * Otherwise if a new song is playing new song duration is set.
+     * This method executes song and checks the console input for valid command. If a valid command is supplied on the input,
+     * that menas the user wants to change the state of the application. The new command is saved in AudioPlayerState.
      *
+     * @return - this method return true if the song is interrupted by new command during the execution, otherwise return false
      * @throws IOException
      * @throws InterruptedException
      */
-    public boolean executeSong() throws IOException, InterruptedException {
-        if (!wasSongPaused) {
+    public boolean execute() throws IOException, InterruptedException {
+        if (!isSongPaused) {
             songDurationLeft = songs.get(currentSongIndex).getTiming();
         } else {
-            wasSongPaused = false;
+            isSongPaused = false;
         }
         for (; songDurationLeft > 0; songDurationLeft--) {
             Thread.sleep(100);
-            if (applicaiton.isStateChanged()) {
+            if (AudioPlayerConsoleIO.checkForInput()) {
                 return true;
             }
         }
         return false;
     }
 
-
     /**
      * This method set the index, which points to the current song to the first one and changes the current state to PLAY
+     * so the controller will start the execution of play method.
      */
     public void replay() {
         currentSongIndex = FIRST_SONG_INDEX;
+        AudioPlayerState.setCurrent(PLAY);
     }
 
     /**
-     * This method pauses the song until the "play" command is given in the console
+     * This method pauses the song until the a valid new command is given in the console. The pause() method returns
+     * the previous state of the audio player
      */
-    public void pauseSong() throws IOException {
-        wasSongPaused = true;
-        while (!applicaiton.isStateChanged()) ;
+    public void pause() throws IOException {
+        isSongPaused = true;
+        while (!AudioPlayerConsoleIO.checkForInput());
     }
 
     /**
-     * This method switch to the previous song of the audio player, if the current song is the first one it switch to the last
+     * This method switch to the previous song of the audio player, if the current song is the first one it switch to the last.
+     * The method also changes the audio player state to PLAY, so it will begin to execute the previous song automatically
      */
-    public void prevSong() {
-        if ((currentSongIndex - 1) >= 0) {
+    public void previous() {
+        if (currentSongIndex > 0) {
             currentSongIndex--;
         } else {
             currentSongIndex = songs.size() - 1;
         }
+        AudioPlayerState.setCurrent(PLAY);
     }
 
     /**
-     * This method switch to the next song of the audio player, if the current song is the last one it switch to the first
+     * This method switch to the next song of the audio player, if the current song is the last one it switch to the first.
+     * The method also changes the audio player state to PLAY, so it will begin to execute the next song automatically
      */
-    public void nextSong() {
-        if ((currentSongIndex + 1) < songs.size()) {
+    public void next() {
+        if (currentSongIndex < songs.size() - 1) {
             currentSongIndex++;
         } else {
             currentSongIndex = FIRST_SONG_INDEX;
         }
+        AudioPlayerState.setCurrent(PLAY);
     }
 
     /**
@@ -151,7 +162,8 @@ public class AudioPlayer {
     }
 
     /**
-     * This method plays the songs in the list, but in random order. If the application state is changed the shuffle is interrupted
+     * This method plays the songs in the list, but in random order. If the user has supplied the console with valid command
+     * this means that the state needs to be changed, so shuffle breaks and passes the commandFromInput to the audio controller.
      *
      * @throws IOException
      * @throws InterruptedException
@@ -162,7 +174,7 @@ public class AudioPlayer {
             do {
                 currentSongIndex = randomSongIndex.nextInt(songs.size());
                 System.out.println("Currently playing :" + getSongInfo());
-            } while (!executeSong());
+            } while (!execute());
         }
     }
 
@@ -172,18 +184,19 @@ public class AudioPlayer {
      * @param title - this parameter is the title of the song to be searched by
      * @return String - this method return the singer of the song and it's number in the list.
      */
-    public String searchByTitle(String title) {
+    public String searchSingerByTitle(String title) {
         if (title != null && !title.isEmpty()) {
             for (Song song : songs) {
                 if (song.getTitle().equalsIgnoreCase(title)) {
                     StringBuilder songInfo = new StringBuilder("Singer: ");
-                    songInfo.append(song.getSinger().getName())
+                    songInfo.append(song.getSingerName())
                             .append("\nSong's number: ")
                             .append(songs.indexOf(song) + 1);
                     return songInfo.toString();
                 }
             }
         }
+        AudioPlayerState.changeCurrentToPrevious();
         return null;
     }
 
@@ -193,16 +206,17 @@ public class AudioPlayer {
      * @param singer - this parameter is the singer of the song, whom we are looking for
      * @return String - this method return list of songs in string format
      */
-    public String searchBySinger(Singer singer) {
+    public String searchSongsBySinger(Singer singer) {
         StringBuilder songsBySinger = new StringBuilder();
         songsBySinger.append("Songs by: ")
                 .append(singer.getName());
 
         for (Song song : songs) {
-            if (song.getSinger().equals(singer)) {
+            if (song.checkSingerName(singer.getName())) {
                 songsBySinger.append(song);
             }
         }
+        AudioPlayerState.changeCurrentToPrevious();
         return songsBySinger.toString();
     }
 
@@ -212,6 +226,7 @@ public class AudioPlayer {
      * @return int - the returned value is the count of the songs in the list
      */
     public int size() {
+        AudioPlayerState.changeCurrentToPrevious();
         return songs.size();
     }
 
@@ -224,17 +239,23 @@ public class AudioPlayer {
         if (song != null) {
             songs.add(song);
         }
+        AudioPlayerState.changeCurrentToPrevious();
     }
 
     /**
-     * This method first check if the song is present in the list and then deletes it from the list
+     * This method first check if the song is present in the list and then it's index is taken. After deletion current song index
+     * needs to be repositioned in case of deletion of the last song or after deletion of song, which was on smaller position in
+     * the list then currentSongIndex. In this cases currentSongIndex is repositioned one position backwards, so that currentSongIndex
+     * won't lose track of the current song.
      *
      * @param song - this parameter is the song to be deleted
      */
     public void remove(Song song) {
         if (songs.contains(song)) {
+            int deleteSongIndex = songs.indexOf(song);
             songs.remove(song);
-            currentSongIndex--;
+            if (currentSongIndex == songs.size() || deleteSongIndex < currentSongIndex)
+                currentSongIndex--;
         }
     }
 }

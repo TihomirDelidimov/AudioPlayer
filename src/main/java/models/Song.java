@@ -1,8 +1,9 @@
 package models;
 
-import static enumeration.Genre.*;
-
 import enumeration.Genre;
+import exceptions.IncorrectSingerException;
+import exceptions.IncorrectSongTitleException;
+import exceptions.InvalidSongTimingException;
 
 /**
  * This class represent song, which will be executed by the audio player
@@ -12,8 +13,6 @@ public class Song {
     private Genre genre;
     private Singer singer;
     private int timing;
-    private static final String DEFAULT_TITLE = "Unknown";
-    private static final int DEFAULT_TIMING = 1;
 
     /**
      * The constructor initialize the class fields with the values from the parameters if they are valid, otherwise it
@@ -25,10 +24,23 @@ public class Song {
      * @param timing - this parameter is timing of the song
      */
     public Song(String title, Singer singer, Genre genre, int timing) {
-        this.title = getValidTitle(title);
-        this.genre = getValidGenre(genre);
-        this.timing = getValidTiming(timing);
-        this.singer = getValidSinger(singer);
+        if (!isTitleValid(title)) {
+            throw new IncorrectSongTitleException("Incorrect song title!");
+        }
+        if (!isSingerValid(singer)) {
+            throw new IncorrectSingerException("Singer cannot be null!");
+        }
+        if (!isGenreValid(genre)) {
+            throw new NullPointerException("Genre cannot be null!");
+        }
+        if (!isTimingValid(timing)) {
+            throw new InvalidSongTimingException("Song timing cannot be 0 or less then 0 seconds!");
+        }
+
+        this.title = title;
+        this.singer = singer;
+        this.genre = genre;
+        this.timing = timing;
     }
 
     public String getTitle() {
@@ -44,47 +56,68 @@ public class Song {
     }
 
     /**
-     * This method check if the song's singer is valid. If it is the singer is returned, otherwise the default value is returned
-     * from Singer class
+     * This method check if the song's singer is valid. If it is the singer is true is returned, otherwise return false
      *
      * @param singer - this parameter is the singer of the song
-     * @return - this method return the singer if the parameter is valid, otherwise return new singer, which will be populated with default values
+     * @return - this method return true if the parameter is not null, otherwise return false
      */
-    private Singer getValidSinger(Singer singer) {
-        return singer != null ? singer : new Singer(null);
+    private boolean isSingerValid(Singer singer) {
+        return singer != null;
     }
 
     /**
-     * This method check if the song's genre is valid. If it is the genre is returned, otherwise UNKNOWN genre is returned
+     * This method check if the song's genre is valid. If it is true is returned, otherwise false value is returned
      *
-     * @param genre - this parameter is the genre of the song
-     * @return - this method return the genre if the parameter is valid, otherwise return default value for the genre
+     * @param genre - this is the genre of the song
+     * @return - this method return true if the parameter is valid, otherwise return falise
      */
-    private Genre getValidGenre(Genre genre) {
-        return genre != null ? genre : UNKNOWN;
+    private boolean isGenreValid(Genre genre) {
+        return genre != null;
     }
 
     /**
-     * This methods check if the song's title is valid. If it is the title is returned, otherwise DEFAULT_TITLE is returned
+     * This method check if the song's title is valid
      *
-     * @param title - this parameter is the title of the song
-     * @return boolean - this method return the title if the parameter is valid, otherwise return default value for the title
+     * @param title - this parameter is the song's title
+     * @return - this method return true if the title is valid, otherwise return false
      */
-    private String getValidTitle(String title) {
-        if (title != null && !title.isEmpty()) {
-            return title;
-        }
-        return DEFAULT_TITLE;
+    private boolean isTitleValid(String title) {
+        return title != null && !title.isEmpty();
     }
 
     /**
-     * This method checks if the song's timing is valid. If it is the timing is returned, otherwise DEFAULT_TIMING is returned
+     * This method check if the song's timing is valid
      *
-     * @param timing - this parameter is song's timing which is measured in seconds
-     * @return boolean - this method return the timing if its valid, otherwise DEFAULT_TIMING
+     * @param timing - this parameter is the timing of the song
+     * @return - this method return true if the timing is valid, otherwise return false
      */
-    private int getValidTiming(int timing) {
-        return timing > 0 ? timing : DEFAULT_TIMING;
+    private boolean isTimingValid(int timing) {
+        return timing > 0;
+    }
+
+    /**
+     * This method check if a given title is equal as song's title
+     * @return - this method return true if the titles are equal, otherwise return false
+     */
+    public boolean checkTitle(String title) {
+        return title.equalsIgnoreCase(this.title);
+    }
+
+    /**
+     * This method is used to get singer's name
+     * @return - this method return singer's name
+     */
+    public String getSingerName() {
+        return singer.getName();
+    }
+
+    /**
+     * This method check if a given name is equal as song's singer name
+     * @param name - this parameter is the name to be checked
+     * @return - this method return true if the names are equal, otherwise return false
+     */
+    public boolean checkSingerName(String name) {
+        return name.equalsIgnoreCase(singer.getName());
     }
 
     /**
