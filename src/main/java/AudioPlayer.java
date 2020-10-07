@@ -160,8 +160,8 @@ public class AudioPlayer {
      * This method plays the songs in the list, but in random order. If the user has supplied the console with valid command
      * this means that the state needs to be changed, so shuffle breaks and passes the commandFromInput to the audio controller.
      *
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          - this exception is thrown if I/O operations failed
+     * @throws InterruptedException - this exception is thrown when the thread is sleeping.
      */
     public void shuffle() throws IOException, InterruptedException {
         Collections.shuffle(songs);
@@ -173,7 +173,7 @@ public class AudioPlayer {
      * This method search the list of songs by the song's title and return the singer's name and song number in the list.
      *
      * @param title - this parameter is the title of the song to be searched by
-     * @return String - this method return the singer of the song and it's number in the list.
+     * @return - this method return the singer of the song and it's number in the list.
      */
     public String searchSingerByTitle(String title) {
         if (title != null && !title.isEmpty()) {
@@ -214,7 +214,7 @@ public class AudioPlayer {
     /**
      * This method return number of songs that are present in the list
      *
-     * @return int - the returned value is the count of the songs in the list
+     * @return - the returned value is the count of the songs in the list
      */
     public int size() {
         audioPlayerState.changeCurrentToPrevious();
