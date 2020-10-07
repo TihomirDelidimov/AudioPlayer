@@ -29,14 +29,15 @@ public class AudioPlayerConsoleIO {
      * @throws IOException - this exception is thrown if I/O operations failed
      */
     public boolean checkForInput() throws IOException {
-        if (inputReader.ready()) {
-            String inputCommand = inputReader.readLine().trim().toUpperCase();
-            if (isValidCommand(inputCommand)) {
-                Command command = findCommand(inputCommand);
-                if (command != INVALID_COMMAND) {
-                    audioPlayerState.setCurrent(command);
-                    return true;
-                }
+        if (!inputReader.ready())
+            return false;
+
+        String inputCommand = inputReader.readLine().trim().toUpperCase();
+        if (isValidCommand(inputCommand)) {
+            Command command = findCommand(inputCommand);
+            if (command != INVALID_COMMAND) {
+                audioPlayerState.setCurrent(command);
+                return true;
             }
         }
         return false;
@@ -109,7 +110,7 @@ public class AudioPlayerConsoleIO {
     /**
      * This method shows the playlist size in the console and returns the application state back to the previous state
      */
-    public void showSize(AudioPlayer audioPlayer) {
-        System.out.println("Playlist size: " + audioPlayer.size());
+    public void showPlaylistSize(AudioPlayer audioPlayer) {
+        System.out.println("Playlist size: " + audioPlayer.PlaylistSize());
     }
 }

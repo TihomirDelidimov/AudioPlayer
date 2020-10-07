@@ -9,8 +9,7 @@ public enum Genre {
     DISCO("Disco"),
     HIPHOP("HIP-HOP"),
     JAZZ("Jazz"),
-    CLASSIC("Classic"),
-    UNKNOWN("Unknown");
+    CLASSIC("Classic");
 
     private String genreName;
 

@@ -2,8 +2,10 @@
 import exceptions.MissingAudioPlayerReferenceException;
 import exceptions.MissingAudioPlayerIOReferenceException;
 import exceptions.MissingAudioPlayerStateReferenceException;
+import models.Song;
 
 import java.io.IOException;
+import java.util.List;
 
 import static enumeration.Command.*;
 
@@ -19,17 +21,29 @@ public class AudioPlayerController {
 
     /**
      * This constructor initializes the {@link AudioPlayerController} object with two references, one of which is
-     * to the {@link AudioPlayer}. The other reference is to the {@link AudioPlayerConsoleIO} object.
+     * to the {@link AudioPlayer}. The other reference is to the {@link AudioPlayerConsoleIO} object. This constructor
+     * uses validator method, which throws exceptions for missing references.
      *
      * @param audioPlayer      - this parameter is reference to the AudioPlayer object
      * @param audioPlayerIO    - this parameter is reference to the AudioPlayerConsoleIO object
      * @param audioPlayerState - this parameter is reference to the AudioPlayerState object
+     */
+    public AudioPlayerController(AudioPlayer audioPlayer, AudioPlayerConsoleIO audioPlayerIO,
+                                 AudioPlayerState audioPlayerState) {
+        validator(audioPlayer, audioPlayerIO, audioPlayerState);
+        this.audioPlayerIO = audioPlayerIO;
+        this.audioPlayer = audioPlayer;
+        this.audioPlayerState = audioPlayerState;
+    }
+
+    /**
+     * This method is used to validate all references passed on to the constructor
+     *
      * @throws MissingAudioPlayerReferenceException      - this exception is thrown when reference to {@link AudioPlayer} is missing
      * @throws MissingAudioPlayerIOReferenceException    - this exception is thrown when reference to {@link AudioPlayerConsoleIO} is missing
      * @throws MissingAudioPlayerStateReferenceException - this exception is thrown when reference to {@link AudioPlayerState} is missing
      */
-    public AudioPlayerController(AudioPlayer audioPlayer, AudioPlayerConsoleIO audioPlayerIO,
-                                 AudioPlayerState audioPlayerState) {
+    private void validator(AudioPlayer audioPlayer, AudioPlayerConsoleIO audioPlayerIO, AudioPlayerState audioPlayerState) {
         if (audioPlayer == null) {
             throw new MissingAudioPlayerReferenceException("Missing AudioPlayer reference!");
         }
@@ -39,21 +53,17 @@ public class AudioPlayerController {
         if (audioPlayerState == null) {
             throw new MissingAudioPlayerStateReferenceException("Missing AudioPlayerState reference!");
         }
-        this.audioPlayerIO = audioPlayerIO;
-        this.audioPlayer = audioPlayer;
-        this.audioPlayerState = audioPlayerState;
     }
 
     /**
-     * This method is the running method of the application. It's purpose is to switch between commands and execute
+     * This method is the running method of the application. Its purpose is to switch between commands and execute
      * audio player methods
-     * This method is the running method of the application. It's purpose is to execute {@link AudioPlayer} methods
+     * This method is the running method of the application. Its purpose is to execute {@link AudioPlayer} methods
      * and interact with the user through {@link AudioPlayerConsoleIO} methods.
      *
      * @throws IOException - this exception is thrown if I/O operations failed
      */
     public void run() throws IOException, InterruptedException {
-        String searchResult;
         while (audioPlayerState.getCurrent() != EXIT) {
             switch (audioPlayerState.getCurrent()) {
                 case PLAY:
@@ -79,18 +89,18 @@ public class AudioPlayerController {
                     audioPlayer.stop();
                     break;
                 case SIZE:
-                    audioPlayerIO.showSize(audioPlayer);
+                    audioPlayerIO.showPlaylistSize(audioPlayer);
                     break;
                 case ADD:
                     audioPlayer.add(audioPlayerIO.getNewSong());
                     break;
                 case SEARCH_SINGER_BY_TITLE:
-                    searchResult = audioPlayer.searchSingerByTitle(audioPlayerIO.getTitleFromInput());
+                    String searchResult = audioPlayer.searchSingerByTitle(audioPlayerIO.getTitleFromInput());
                     audioPlayerIO.showAudioPlayerOutput(searchResult);
                     break;
                 case SEARCH_SONGS_BY_SINGER:
-                    searchResult = audioPlayer.searchSongsBySinger(audioPlayerIO.getSingerFromInput());
-                    audioPlayerIO.showAudioPlayerOutput(searchResult);
+                    List<Song> searchResultList = audioPlayer.searchSongsBySinger(audioPlayerIO.getSingerFromInput());
+                    audioPlayerIO.showAudioPlayerOutput(searchResultList.toString());
                     break;
             }
         }

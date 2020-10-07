@@ -99,7 +99,7 @@ public class Song {
      * This method check if a given title is equal as song's title
      * @return - this method return true if the titles are equal, otherwise return false
      */
-    public boolean checkTitle(String title) {
+    public boolean titleEquals(String title) {
         return title.equalsIgnoreCase(this.title);
     }
 

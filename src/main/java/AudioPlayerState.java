@@ -5,8 +5,8 @@ import enumeration.Command;
  * player
  */
 public class AudioPlayerState {
-    private static Command previousCommand;
-    private static Command currentCommand;
+    private Command previousCommand;
+    private Command currentCommand;
 
     /**
      * This method is used to set the current state of the application. When new state is set, the current is saved as previous

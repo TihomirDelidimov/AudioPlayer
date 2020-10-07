@@ -16,10 +16,11 @@ public class AudioPlayer {
     private AudioPlayerState audioPlayerState;
     private List<Song> songs = new ArrayList<>();
     private int currentSongIndex;
-    private boolean isSongPaused;
-    private boolean isSongStopped;
+    private boolean isSongPaused = false;
+    private boolean isSongStopped = false;
+    private boolean isShuffled = false;
     private int songDurationLeft;
-    private static int FIRST_SONG_INDEX = 0;
+    private final int FIRST_SONG_INDEX = 0;
 
     /**
      * This constructor initializes the {@link AudioPlayer} object with reference to the {@link AudioPlayerConsoleIO}, which is
@@ -42,10 +43,7 @@ public class AudioPlayer {
      */
     @Override
     public String toString() {
-        StringBuilder audioPlayerInfo = new StringBuilder();
-        audioPlayerInfo.append("\nSongs: ")
-                .append(songs);
-        return audioPlayerInfo.toString();
+        return new StringBuilder("\nSongs:").append(songs).toString();
     }
 
     /**
@@ -56,12 +54,12 @@ public class AudioPlayer {
      * will start from the beginning.
      *
      * @return - this method return command, which represent a request to change the state of the application by the user
-     * @throws IOException          - this exception is thrown if I/O operations failed
-     * @throws InterruptedException - this exception is thrown when the thread is sleeping.
+     * @throws IOException
+     * @throws InterruptedException
      */
     public void play() throws IOException, InterruptedException {
         for (; currentSongIndex < songs.size(); next()) {
-            System.out.println("Currently playing :" + getSongInfo());
+            System.out.println("Currently playing : \n" + getSongInfo());
             if (execute()) {
                 return;
             }
@@ -74,22 +72,21 @@ public class AudioPlayer {
      * that menas the user wants to change the state of the application. The new command is saved in {@link AudioPlayerState}
      *
      * @return - this method return true if the song is interrupted by new command during the execution, otherwise return false
-     * @throws IOException          - this exception is thrown if I/O operations failed
-     * @throws InterruptedException - this exception is thrown when the thread is sleeping.
+     * @throws IOException
+     * @throws InterruptedException
      */
     public boolean execute() throws IOException, InterruptedException {
-        if (!isSongPaused || !isSongStopped) {
+        if (!isSongPaused && !isSongStopped) {
             songDurationLeft = songs.get(currentSongIndex).getTiming();
         } else {
             isSongPaused = false;
             isSongStopped = false;
         }
         for (; songDurationLeft >= 0; songDurationLeft--) {
-            Thread.sleep(1000);
+            Thread.sleep(100);
             if (audioPlayerIO.checkForInput()) {
                 return true;
             }
-            System.out.print(songDurationLeft + "\r");
         }
         return false;
     }
@@ -146,9 +143,9 @@ public class AudioPlayer {
      */
     public String getSongInfo() {
         StringBuilder songInfo = new StringBuilder();
-        songInfo.append("\n\tCurrent song: ")
+        songInfo.append("\tTitle: ")
                 .append(songs.get(currentSongIndex).getTitle())
-                .append("\n\tNumber in the list: ")
+                .append("\n\tPosition: ")
                 .append(currentSongIndex + 1)
                 .append("\n\tSinger: ")
                 .append(songs.get(currentSongIndex).getSinger().getName());
@@ -164,9 +161,13 @@ public class AudioPlayer {
      * @throws InterruptedException - this exception is thrown when the thread is sleeping.
      */
     public void shuffle() throws IOException, InterruptedException {
-        Collections.shuffle(songs);
-        currentSongIndex = FIRST_SONG_INDEX;
-        audioPlayerState.setCurrent(PLAY);
+        if (currentSongIndex < songs.size()) {
+            Random randomSongIndex = new Random();
+            do {
+                currentSongIndex = randomSongIndex.nextInt(songs.size());
+                System.out.println("Currently playing :" + getSongInfo());
+            } while (!execute());
+        }
     }
 
     /**
@@ -176,16 +177,17 @@ public class AudioPlayer {
      * @return - this method return the singer of the song and it's number in the list.
      */
     public String searchSingerByTitle(String title) {
-        if (title != null && !title.isEmpty()) {
-            for (Song song : songs) {
-                if (song.getTitle().equalsIgnoreCase(title)) {
-                    StringBuilder songInfo = new StringBuilder("Singer: ");
-                    songInfo.append(song.getSingerName())
-                            .append("\nSong's number: ")
-                            .append(songs.indexOf(song) + 1);
-                    audioPlayerState.changeCurrentToPrevious();
-                    return songInfo.toString();
-                }
+        if (title == null || title.isEmpty()) {
+            return null;
+        }
+        for (Song song : songs) {
+            if (song.titleEquals(title)) {
+                StringBuilder songInfo = new StringBuilder("Singer: ");
+                songInfo.append(song.getSingerName())
+                        .append("\nSong's number: ")
+                        .append(songs.indexOf(song) + 1);
+                audioPlayerState.changeCurrentToPrevious();
+                return songInfo.toString();
             }
         }
         return null;
@@ -197,18 +199,15 @@ public class AudioPlayer {
      * @param singer - this parameter is the singer of the song, whom we are looking for
      * @return String - this method return list of songs in string format
      */
-    public String searchSongsBySinger(Singer singer) {
-        StringBuilder songsBySinger = new StringBuilder();
-        songsBySinger.append("Songs by: ")
-                .append(singer.getName());
-
+    public List<Song> searchSongsBySinger(Singer singer) {
+        List<Song> songsList = new ArrayList<>();
         for (Song song : songs) {
             if (song.checkSingerName(singer.getName())) {
-                songsBySinger.append(song);
+                songsList.add(song);
             }
         }
         audioPlayerState.changeCurrentToPrevious();
-        return songsBySinger.toString();
+        return songsList;
     }
 
     /**
@@ -216,7 +215,7 @@ public class AudioPlayer {
      *
      * @return - the returned value is the count of the songs in the list
      */
-    public int size() {
+    public int PlaylistSize() {
         audioPlayerState.changeCurrentToPrevious();
         return songs.size();
     }
@@ -245,8 +244,9 @@ public class AudioPlayer {
         if (songs.contains(song)) {
             int deleteSongIndex = songs.indexOf(song);
             songs.remove(song);
-            if (currentSongIndex == songs.size() || deleteSongIndex < currentSongIndex)
+            if (currentSongIndex == songs.size() || deleteSongIndex < currentSongIndex) {
                 currentSongIndex--;
+            }
         }
     }
 
@@ -254,8 +254,9 @@ public class AudioPlayer {
      * This method stops the execution of the songs and resets the playlist to the beginning
      */
     public void stop() throws IOException {
-        while(!audioPlayerIO.checkForInput());
-        if(audioPlayerState.getCurrent() == PLAY)
+        while (!audioPlayerIO.checkForInput()) ;
+        if (audioPlayerState.getCurrent() == PLAY) {
             currentSongIndex = FIRST_SONG_INDEX;
+        }
     }
 }
