@@ -1,6 +1,7 @@
 
 import exceptions.MissingAudioPlayerReferenceException;
 import exceptions.MissingAudioPlayerIOReferenceException;
+import exceptions.MissingAudioPlayerStateReferenceException;
 
 import java.io.IOException;
 
@@ -17,11 +18,15 @@ public class AudioPlayerController {
     private AudioPlayerConsoleIO audioPlayerIO;
 
     /**
-     * This constructor initializes the AudioPlayerController object with two references, one of which is
-     * to the AudioPlayer. If this references is missing MissingAudioPlayerReferenceException exception is thrown
+     * This constructor initializes the {@link AudioPlayerController} object with two references, one of which is
+     * to the {@link AudioPlayer}. The other reference is to the {@link AudioPlayerConsoleIO} object.
      *
-     * @param audioPlayer   - this parameter is reference to the AudioPlayer
-     * @param audioPlayerIO - this parameter is reference to the AudioPlayerConsoleIO
+     * @param audioPlayer      - this parameter is reference to the AudioPlayer object
+     * @param audioPlayerIO    - this parameter is reference to the AudioPlayerConsoleIO object
+     * @param audioPlayerState - this parameter is reference to the AudioPlayerState object
+     * @throws MissingAudioPlayerReferenceException      - this exception is thrown when reference to {@link AudioPlayer} is missing
+     * @throws MissingAudioPlayerIOReferenceException    - this exception is thrown when reference to {@link AudioPlayerConsoleIO} is missing
+     * @throws MissingAudioPlayerStateReferenceException - this exception is thrown when reference to {@link AudioPlayerState} is missing
      */
     public AudioPlayerController(AudioPlayer audioPlayer, AudioPlayerConsoleIO audioPlayerIO,
                                  AudioPlayerState audioPlayerState) {
@@ -31,6 +36,9 @@ public class AudioPlayerController {
         if (audioPlayerIO == null) {
             throw new MissingAudioPlayerIOReferenceException("Missing AudioPlayerConsoleIO reference!");
         }
+        if (audioPlayerState == null) {
+            throw new MissingAudioPlayerStateReferenceException("Missing AudioPlayerState reference!");
+        }
         this.audioPlayerIO = audioPlayerIO;
         this.audioPlayer = audioPlayer;
         this.audioPlayerState = audioPlayerState;
@@ -39,11 +47,10 @@ public class AudioPlayerController {
     /**
      * This method is the running method of the application. It's purpose is to switch between commands and execute
      * audio player methods
-     * <p>
      * This method is the running method of the application. It's purpose is to execute {@link AudioPlayer} methods
      * and interact with the user through {@link AudioPlayerConsoleIO} methods.
      *
-     * @throws IOException
+     * @throws IOException - this exception is thrown if I/O operations failed
      */
     public void run() throws IOException, InterruptedException {
         String searchResult;
@@ -68,17 +75,20 @@ public class AudioPlayerController {
                     System.out.println("On pause..");
                     audioPlayer.pause();
                     break;
+                case STOP:
+                    audioPlayer.stop();
+                    break;
                 case SIZE:
                     audioPlayerIO.showSize(audioPlayer);
                     break;
                 case ADD:
                     audioPlayer.add(audioPlayerIO.getNewSong());
                     break;
-                case SEARCH_BY_TITLE:
+                case SEARCH_SINGER_BY_TITLE:
                     searchResult = audioPlayer.searchSingerByTitle(audioPlayerIO.getTitleFromInput());
                     audioPlayerIO.showAudioPlayerOutput(searchResult);
                     break;
-                case SEARCH_BY_SINGER:
+                case SEARCH_SONGS_BY_SINGER:
                     searchResult = audioPlayer.searchSongsBySinger(audioPlayerIO.getSingerFromInput());
                     audioPlayerIO.showAudioPlayerOutput(searchResult);
                     break;

@@ -26,7 +26,7 @@ public class AudioPlayerConsoleIO {
      * method returns false.
      *
      * @return - this method return true if valid command is given in the console, otherwise return false
-     * @throws IOException
+     * @throws IOException - this exception is thrown if I/O operations failed
      */
     public boolean checkForInput() throws IOException {
         if (inputReader.ready()) {
@@ -49,7 +49,7 @@ public class AudioPlayerConsoleIO {
      * The method also return the application to previous state, which was before the searching.
      *
      * @return - this method returns new Singer object, which is used by the AudioPlayer for the searching.
-     * @throws IOException
+     * @throws IOException - this exception is thrown if I/O operations failed
      */
     public Singer getSingerFromInput() throws IOException {
         System.out.print("Enter singer: ");
@@ -68,7 +68,7 @@ public class AudioPlayerConsoleIO {
      * The method also return the application to previous state, which was before the searching.
      *
      * @return - this method returns Song's title, which is used by the AudioPlayer for the searching.
-     * @throws IOException
+     * @throws IOException - this exception is thrown if I/O operations failed
      */
     public String getTitleFromInput() throws IOException {
         System.out.print("Enter title: ");
@@ -99,7 +99,7 @@ public class AudioPlayerConsoleIO {
         System.out.print("Enter song's singer: ");
         String songSinger = inputReader.readLine();
         System.out.print("Enter song's genre: ");
-        String songGenre = inputReader.readLine();
+        String songGenre = inputReader.readLine().toUpperCase();
         System.out.print("Enter song's timing(in seconds): ");
         int songTiming = Integer.parseInt(inputReader.readLine());
         Singer singer = new Singer(songSinger);

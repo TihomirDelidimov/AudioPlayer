@@ -46,7 +46,7 @@ public enum Genre {
      * @param genre - this parameter is the genre in string format, which is evaluated to Genre constant
      * @return - this method return Genre constant
      */
-    public static Genre getGenreFromString(String genre) {
+    public static Genre findGenre(String genre) {
         if (genre != null && !genre.isEmpty()) {
             return Genre.valueOf(genre.toUpperCase());
         }

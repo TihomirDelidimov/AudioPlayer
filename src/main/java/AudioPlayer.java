@@ -1,33 +1,31 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.io.IOException;
 
 import static enumeration.Command.*;
 
-import enumeration.Command;
 import exceptions.MissingAudioPlayerIOReferenceException;
 import models.Song;
 import models.Singer;
 
 /**
- * This class represent an audio player and it's functions
+ * This class represent an audio player and it's functionality, which is storing the songs in a list and managing
+ * the life cycle of the list.
  */
 public class AudioPlayer {
     private AudioPlayerConsoleIO audioPlayerIO;
     private AudioPlayerState audioPlayerState;
     private List<Song> songs = new ArrayList<>();
-    private final Command commandFromInput = INVALID_COMMAND;
     private int currentSongIndex;
     private boolean isSongPaused;
+    private boolean isSongStopped;
     private int songDurationLeft;
     private static int FIRST_SONG_INDEX = 0;
 
     /**
-     * This constructor initializes the AudioPlayer object with reference to the AudioPlayerConsoleIO, which is
+     * This constructor initializes the {@link AudioPlayer} object with reference to the {@link AudioPlayerConsoleIO}, which is
      * needed to track the changes on the input while playing a song
      *
-     * @param audioPlayerIO - this parameter is references to the AudioPlayerConsoleIO
+     * @param audioPlayerIO - this parameter is references to the AudioPlayerConsoleIO object
      */
     public AudioPlayer(AudioPlayerConsoleIO audioPlayerIO, AudioPlayerState audioPlayerState) {
         if (audioPlayerIO == null) {
@@ -38,9 +36,9 @@ public class AudioPlayer {
     }
 
     /**
-     * This method is used to get AudioPlayer object's characteristics in string format
+     * This method is used to get {@link AudioPlayer} object's characteristics in string format
      *
-     * @return String - this method return AudioPlayer object's characteristics in string format
+     * @return String - this method return {@link AudioPlayer} object's characteristics in string format
      */
     @Override
     public String toString() {
@@ -58,8 +56,8 @@ public class AudioPlayer {
      * will start from the beginning.
      *
      * @return - this method return command, which represent a request to change the state of the application by the user
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          - this exception is thrown if I/O operations failed
+     * @throws InterruptedException - this exception is thrown when the thread is sleeping.
      */
     public void play() throws IOException, InterruptedException {
         for (; currentSongIndex < songs.size(); next()) {
@@ -73,23 +71,25 @@ public class AudioPlayer {
 
     /**
      * This method executes song and checks the console input for valid command. If a valid command is supplied on the input,
-     * that menas the user wants to change the state of the application. The new command is saved in AudioPlayerState.
+     * that menas the user wants to change the state of the application. The new command is saved in {@link AudioPlayerState}
      *
      * @return - this method return true if the song is interrupted by new command during the execution, otherwise return false
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException          - this exception is thrown if I/O operations failed
+     * @throws InterruptedException - this exception is thrown when the thread is sleeping.
      */
     public boolean execute() throws IOException, InterruptedException {
-        if (!isSongPaused) {
+        if (!isSongPaused || !isSongStopped) {
             songDurationLeft = songs.get(currentSongIndex).getTiming();
         } else {
             isSongPaused = false;
+            isSongStopped = false;
         }
         for (; songDurationLeft >= 0; songDurationLeft--) {
-            Thread.sleep(100);
+            Thread.sleep(1000);
             if (audioPlayerIO.checkForInput()) {
                 return true;
             }
+            System.out.print(songDurationLeft + "\r");
         }
         return false;
     }
@@ -142,7 +142,7 @@ public class AudioPlayer {
      * This method is used to get specific information about the song which is the song's title, song's number in the list
      * and the singer's name in string format
      *
-     * @return String - this method return song's title, song's number and singer's name in a string format
+     * @return - this method return song's title, song's number and singer's name in a string format
      */
     public String getSongInfo() {
         StringBuilder songInfo = new StringBuilder();
@@ -164,13 +164,9 @@ public class AudioPlayer {
      * @throws InterruptedException
      */
     public void shuffle() throws IOException, InterruptedException {
-        if (currentSongIndex < songs.size()) {
-            Random randomSongIndex = new Random();
-            do {
-                currentSongIndex = randomSongIndex.nextInt(songs.size());
-                System.out.println("Currently playing :" + getSongInfo());
-            } while (!execute());
-        }
+        Collections.shuffle(songs);
+        currentSongIndex = FIRST_SONG_INDEX;
+        audioPlayerState.setCurrent(PLAY);
     }
 
     /**
@@ -252,5 +248,14 @@ public class AudioPlayer {
             if (currentSongIndex == songs.size() || deleteSongIndex < currentSongIndex)
                 currentSongIndex--;
         }
+    }
+
+    /**
+     * This method stops the execution of the songs and resets the playlist to the beginning
+     */
+    public void stop() throws IOException {
+        while(!audioPlayerIO.checkForInput());
+        if(audioPlayerState.getCurrent() == PLAY)
+            currentSongIndex = FIRST_SONG_INDEX;
     }
 }

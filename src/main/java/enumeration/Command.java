@@ -10,11 +10,12 @@ public enum Command {
     PREVIOUS("previous"),
     PAUSE("pause"),
     SHUFFLE("shuffle"),
+    STOP("stop"),
     EXIT("exit"),
     SIZE("size"),
     ADD("add"),
-    SEARCH_BY_TITLE("sbt"),
-    SEARCH_BY_SINGER("sbs"),
+    SEARCH_SINGER_BY_TITLE("sbt"),
+    SEARCH_SONGS_BY_SINGER("sbs"),
     INVALID_COMMAND("unknown");
 
     private String commandName;
